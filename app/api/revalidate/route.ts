@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { revalidateTag } from "next/cache";
+import { dangerouslyDeleteByTag } from "@vercel/functions";
 import { createHmac, timingSafeEqual } from "crypto";
 import { DOCS_TREE_TAG, NAV_TAG } from "@/lib/github-docs";
 
@@ -96,13 +97,22 @@ export async function POST(request: NextRequest) {
 
   const list = [...tags];
   for (const tag of list) {
-    // Single-arg form (deprecated in Next, but still functional): on Vercel it
-    // deletes the cache entry ("Tag-based deletion" -> REVALIDATED), so the
-    // next request regenerates fresh content. The two-arg forms ('max' /
-    // { expire }) only invalidate ("Tag-based invalidation" -> STALE), which
-    // keeps serving the old copy until the background refresh finishes.
-    // See https://vercel.com/docs/caching/cache-status
+    // Single-arg form (deprecated in Next, but still functional): purges the
+    // Next.js data cache (fetch entries) immediately. The two-arg forms
+    // ('max' / { expire }) only mark entries stale (stale-while-revalidate),
+    // which keeps serving the old copy on Vercel.
     (revalidateTag as unknown as (tag: string) => void)(tag);
+  }
+
+  // Additionally delete the Vercel CDN/edge cache entries by tag. Per Vercel
+  // docs, revalidateTag with a lifetime only "invalidates" (serves stale while
+  // regenerating); deletion ("REVALIDATED") requires the explicit API.
+  if (process.env.VERCEL) {
+    try {
+      await dangerouslyDeleteByTag(list);
+    } catch {
+      // non-fatal: data cache purge above still applies
+    }
   }
 
   return NextResponse.json({ ok: true, revalidated: list });
