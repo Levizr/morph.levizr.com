@@ -6,7 +6,7 @@ import { renderMarkdown } from "@/lib/markdown";
 import { CodeCopyButtons } from "../CodeCopyButtons";
 
 export const dynamic = "force-static";
-export const revalidate = false;
+export const revalidate = 60;
 
 interface PageProps {
   params: Promise<{ slug: string[] }>;

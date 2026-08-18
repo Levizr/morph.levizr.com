@@ -48,7 +48,7 @@ export async function fetchDocsNav(): Promise<DocEntry[]> {
     {
       headers: headers(),
       cache: "force-cache",
-      next: { revalidate: false, tags: [NAV_TAG, DOCS_TREE_TAG] },
+      next: { revalidate: 60, tags: [NAV_TAG, DOCS_TREE_TAG] },
     }
   );
 
@@ -91,7 +91,7 @@ export async function fetchDocsTree(): Promise<DocEntry[]> {
     {
       headers: headers(),
       cache: "force-cache",
-      next: { revalidate: false, tags: [DOCS_TREE_TAG] },
+      next: { revalidate: 60, tags: [DOCS_TREE_TAG] },
     }
   );
   if (!res.ok) return [];
@@ -128,7 +128,7 @@ export async function fetchDocMarkdown(slug: string[]): Promise<string | null> {
     {
       headers: headers(),
       cache: "force-cache",
-      next: { revalidate: false, tags: [DOCS_TAG, `doc-${slug.join("/")}`] },
+      next: { revalidate: 60, tags: [DOCS_TAG, `doc-${slug.join("/")}`] },
     }
   );
   if (!res.ok) return null;
