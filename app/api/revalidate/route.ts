@@ -96,7 +96,13 @@ export async function POST(request: NextRequest) {
 
   const list = [...tags];
   for (const tag of list) {
-    revalidateTag(tag, { expire: 0 });
+    // Single-arg form (deprecated in Next, but still functional): on Vercel it
+    // deletes the cache entry ("Tag-based deletion" -> REVALIDATED), so the
+    // next request regenerates fresh content. The two-arg forms ('max' /
+    // { expire }) only invalidate ("Tag-based invalidation" -> STALE), which
+    // keeps serving the old copy until the background refresh finishes.
+    // See https://vercel.com/docs/caching/cache-status
+    (revalidateTag as unknown as (tag: string) => void)(tag);
   }
 
   return NextResponse.json({ ok: true, revalidated: list });
