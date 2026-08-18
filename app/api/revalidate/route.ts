@@ -96,7 +96,7 @@ export async function POST(request: NextRequest) {
 
   const list = [...tags];
   for (const tag of list) {
-    revalidateTag(tag, "max");
+    revalidateTag(tag, { expire: 0 });
   }
 
   return NextResponse.json({ ok: true, revalidated: list });
