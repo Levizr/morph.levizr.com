@@ -97,11 +97,10 @@ export async function POST(request: NextRequest) {
 
   const list = [...tags];
   for (const tag of list) {
-    // Single-arg form (deprecated in Next, but still functional): purges the
-    // Next.js data cache (fetch entries) immediately. The two-arg forms
-    // ('max' / { expire }) only mark entries stale (stale-while-revalidate),
-    // which keeps serving the old copy on Vercel.
-    (revalidateTag as unknown as (tag: string) => void)(tag);
+    // Next 16 documented webhook pattern: passing { expire: 0 } expires the
+    // tag entry immediately, so the next request is a blocking cache miss
+    // (fresh content) instead of stale-while-revalidate.
+    revalidateTag(tag, { expire: 0 });
   }
 
   // Additionally delete the Vercel CDN/edge cache entries by tag. Per Vercel
