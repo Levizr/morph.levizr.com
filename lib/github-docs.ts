@@ -12,12 +12,28 @@ export interface DocEntry {
   title: string;
   section: string;
   file?: string;
+  status?: string;
+  author?: string;
+  description?: string;
+  keywords?: string[];
+  lastUpdated?: string;
+  publishedAt?: string;
+  priority?: number;
+  changefreq?: string;
 }
 
 interface SidebarItem {
   title?: string;
   slug?: string;
   file?: string;
+  status?: string;
+  author?: string;
+  description?: string;
+  keywords?: string[];
+  lastUpdated?: string;
+  publishedAt?: string;
+  priority?: number;
+  changefreq?: string;
 }
 
 interface SidebarSection {
@@ -44,7 +60,7 @@ function normalizeTitle(title: string, slug: string): string {
 
 export async function fetchDocsNav(): Promise<DocEntry[]> {
   const res = await fetch(
-    `https://raw.githubusercontent.com/${OWNER}/${REPO}/${BRANCH}/${DOCS_DIR}/sidebar.json`,
+    `https://raw.githubusercontent.com/${OWNER}/${REPO}/${BRANCH}/${DOCS_DIR}/docs.registry.json`,
     {
       headers: headers(),
       cache: "force-cache",
@@ -75,6 +91,14 @@ export async function fetchDocsNav(): Promise<DocEntry[]> {
             file,
             title: normalizeTitle(item.title ?? "", slug),
             section: category,
+            status: item.status,
+            author: item.author,
+            description: item.description,
+            keywords: item.keywords,
+            lastUpdated: item.lastUpdated,
+            publishedAt: item.publishedAt,
+            priority: item.priority,
+            changefreq: item.changefreq,
           });
         }
       }
