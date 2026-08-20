@@ -169,6 +169,30 @@ export function normalizePath(path: string): string {
   return parts.join("/");
 }
 
+/**
+ * Resolves a relative link against the current docs page (currentPath is
+ * relative to the docs/ directory). `escaped` is true when the link points
+ * above the docs root (e.g. ../../CONTRIBUTING.md) — i.e. a repo file,
+ * not a docs page.
+ */
+function resolveWithinDocs(
+  currentPath: string,
+  target: string
+): { resolved: string; escaped: boolean } {
+  const dir = currentPath.split("/").slice(0, -1).join("/");
+  const parts = (dir ? `${dir}/${target}` : target).split("/");
+  const out: string[] = [];
+  let escaped = false;
+  for (const part of parts) {
+    if (part === "" || part === ".") continue;
+    if (part === "..") {
+      if (out.length > 0) out.pop();
+      else escaped = true;
+    } else out.push(part);
+  }
+  return { resolved: out.join("/"), escaped };
+}
+
 export function resolveDocLink(href: string, currentPath: string): string {
   if (/^(https?:)?\/\//.test(href) || href.startsWith("#") || href.startsWith("/")) {
     return href;
@@ -176,19 +200,19 @@ export function resolveDocLink(href: string, currentPath: string): string {
 
   const [target, hash] = href.split("#");
 
-  const dir = currentPath.split("/").slice(0, -1).join("/");
-  const resolved = normalizePath(dir ? `${dir}/${target}` : target);
-
   if (target.endsWith(".md")) {
-    const withoutExt = resolved.replace(/\.md$/, "");
-    if (withoutExt.startsWith(DOCS_DIR)) {
-      return `/docs/${withoutExt.slice(DOCS_DIR.length + 1)}${hash ? `#${hash}` : ""}`;
+    const { resolved, escaped } = resolveWithinDocs(currentPath, target);
+    if (escaped) {
+      return `https://github.com/${OWNER}/${REPO}/blob/${BRANCH}/${resolved}${
+        hash ? `#${hash}` : ""
+      }`;
     }
-    return `https://github.com/${OWNER}/${REPO}/blob/${BRANCH}/${resolved}${
-      hash ? `#${hash}` : ""
-    }`;
+    let page = resolved.replace(/\.md$/, "");
+    if (page.startsWith(DOCS_DIR)) page = page.slice(DOCS_DIR.length + 1);
+    return `/docs/${page}${hash ? `#${hash}` : ""}`;
   }
 
+  const { resolved } = resolveWithinDocs(currentPath, target);
   if (resolved.startsWith(DOCS_DIR) || resolved.startsWith("assets/")) {
     return `https://raw.githubusercontent.com/${OWNER}/${REPO}/${BRANCH}/${resolved}`;
   }

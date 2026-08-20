@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Search, FileText, CornerDownLeft } from "lucide-react";
 import type { DocIndexEntry } from "@/lib/docs-search";
@@ -11,8 +11,6 @@ interface SearchResult {
   snippet: string;
 }
 
-let indexCache: DocIndexEntry[] | null = null;
-
 function normalize(s: string): string {
   return s.toLowerCase().replace(/[-_/]/g, " ");
 }
@@ -21,11 +19,16 @@ function scoreDoc(doc: DocIndexEntry, words: string[]): number {
   const title = normalize(doc.title);
   const text = normalize(doc.text);
   const section = normalize(doc.section);
+  const description = normalize(doc.description);
+  const keywords = doc.keywords.map(normalize);
   const headings = doc.headings.map(normalize);
   const full = words.join(" ");
 
   let score = 0;
   if (title.includes(full)) score += 50;
+  if (title.startsWith(full)) score += 15;
+  if (keywords.some((k) => k.includes(full) || full.includes(k))) score += 30;
+  if (description.includes(full)) score += 15;
   if (section.includes(full)) score += 10;
   if (headings.some((h) => h.includes(full))) score += 8;
   if (text.includes(full)) score += 4;
@@ -33,18 +36,36 @@ function scoreDoc(doc: DocIndexEntry, words: string[]): number {
   for (const w of words) {
     if (w.length < 2) continue;
     if (title.includes(w)) score += 12;
+    if (title.startsWith(w)) score += 6;
+    if (keywords.some((k) => k.includes(w))) score += 10;
     if (headings.some((h) => h.includes(w))) score += 5;
+    if (description.includes(w)) score += 4;
     if (section.includes(w)) score += 3;
     if (text.includes(w)) score += 1;
   }
+
+  score += Math.round((doc.priority ?? 0.5) * 8);
   return score;
 }
 
 function makeSnippet(doc: DocIndexEntry, query: string): string {
   const q = normalize(query);
+  const words = q.split(/\s+/).filter((w) => w.length > 1);
   const text = doc.text;
-  const idx = text.toLowerCase().indexOf(q);
+
+  const findIdx = (hay: string): number => {
+    const idx = hay.toLowerCase().indexOf(q);
+    if (idx >= 0) return idx;
+    for (const w of words) {
+      const i = hay.toLowerCase().indexOf(w);
+      if (i >= 0) return i;
+    }
+    return -1;
+  };
+
+  const idx = findIdx(text);
   if (idx < 0) {
+    if (doc.description) return doc.description;
     return text.slice(0, 140) + (text.length > 140 ? "…" : "");
   }
   const start = Math.max(0, idx - 50);
@@ -56,25 +77,66 @@ function makeSnippet(doc: DocIndexEntry, query: string): string {
   );
 }
 
+function highlight(text: string, query: string): React.ReactNode {
+  const words = normalize(query)
+    .split(/\s+/)
+    .filter((w) => w.length > 1)
+    .map((w) => w.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"));
+  if (words.length === 0) return text;
+  const re = new RegExp(`(${words.join("|")})`, "gi");
+  return text.split(re).map((part, i) =>
+    i % 2 === 1 ? (
+      <mark key={i} className="bg-transparent text-accent font-semibold">
+        {part}
+      </mark>
+    ) : (
+      part
+    )
+  );
+}
+
 export function DocsSearch() {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
-  const [results, setResults] = useState<SearchResult[]>([]);
+  const [index, setIndex] = useState<DocIndexEntry[] | null>(null);
   const [active, setActive] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
 
-  const loadIndex = useCallback(async () => {
-    if (indexCache) return indexCache;
-    try {
-      const res = await fetch("/api/docs/search");
-      const data = await res.json();
-      indexCache = Array.isArray(data.docs) ? data.docs : [];
-    } catch {
-      indexCache = [];
+  const [lastOpen, setLastOpen] = useState(open);
+  if (open !== lastOpen) {
+    setLastOpen(open);
+    if (!open) setQuery("");
+  }
+
+  const q = query.trim();
+
+  const results = useMemo<SearchResult[]>(() => {
+    if (!open) return [];
+    const words = normalize(q).split(/\s+/).filter(Boolean);
+    if (!q || !index) {
+      return [...(index ?? [])]
+        .sort((a, b) => b.priority - a.priority)
+        .slice(0, 10)
+        .map((doc) => ({ doc, score: 0, snippet: doc.description }));
     }
-    return indexCache;
-  }, []);
+    const scored = index
+      .map((doc) => ({ doc, score: scoreDoc(doc, words) }))
+      .filter((r) => r.score > 0)
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 20);
+    return scored.map((r) => ({
+      doc: r.doc,
+      score: r.score,
+      snippet: makeSnippet(r.doc, q),
+    }));
+  }, [open, q, index]);
+
+  const [lastQuery, setLastQuery] = useState(q);
+  if (lastQuery !== q) {
+    setLastQuery(q);
+    setActive(0);
+  }
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -96,49 +158,23 @@ export function DocsSearch() {
   }, [open]);
 
   useEffect(() => {
-    if (!open) {
-      setQuery("");
-      setResults([]);
-      setActive(0);
-      return;
-    }
+    if (!open) return;
     inputRef.current?.focus();
-    loadIndex();
-  }, [open, loadIndex]);
-
-  useEffect(() => {
-    if (!open) {
-      setResults([]);
-      setActive(0);
-      return;
-    }
-    const q = query.trim();
-    if (!q || !indexCache) {
-      setResults(
-        (indexCache ?? []).slice(0, 10).map((doc) => ({
-          doc,
-          score: 0,
-          snippet: "",
-        }))
-      );
-      setActive(0);
-      return;
-    }
-    const words = normalize(q).split(/\s+/).filter(Boolean);
-    const scored = (indexCache ?? [])
-      .map((doc) => ({ doc, score: scoreDoc(doc, words) }))
-      .filter((r) => r.score > 0)
-      .sort((a, b) => b.score - a.score)
-      .slice(0, 20);
-    setResults(
-      scored.map((r) => ({
-        doc: r.doc,
-        score: r.score,
-        snippet: makeSnippet(r.doc, q),
-      }))
-    );
-    setActive(0);
-  }, [query, open]);
+    if (index) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch("/api/docs/search");
+        const data = await res.json();
+        if (!cancelled) setIndex(Array.isArray(data.docs) ? data.docs : []);
+      } catch {
+        if (!cancelled) setIndex([]);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [open, index]);
 
   const onInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "ArrowDown") {
@@ -194,12 +230,17 @@ export function DocsSearch() {
             </div>
 
             <div className="max-h-[55vh] overflow-y-auto py-2">
-              {results.length === 0 && query.trim() ? (
+              {results.length === 0 && q ? (
                 <p className="px-4 py-6 text-sm text-muted text-center">
                   No results for &quot;{query}&quot;
                 </p>
               ) : (
                 <ul>
+                  {!q && (
+                    <li className="px-4 pt-1.5 pb-2 text-[11px] uppercase tracking-wider text-muted/70">
+                      Top docs
+                    </li>
+                  )}
                   {results.map((r, i) => (
                     <li key={r.doc.path}>
                       <button
@@ -216,14 +257,21 @@ export function DocsSearch() {
                       >
                         <span className="flex items-center gap-2 text-sm font-medium">
                           <FileText className="w-3.5 h-3.5 shrink-0 text-accent" />
-                          <span className="truncate">{r.doc.title}</span>
+                          <span className="truncate">
+                            {highlight(r.doc.title, query)}
+                          </span>
                           <span className="ml-auto shrink-0 text-[10px] uppercase tracking-wider text-muted/70 border border-border rounded px-1.5 py-0.5">
                             {r.doc.section}
                           </span>
+                          {r.doc.status !== "production" && (
+                            <span className="shrink-0 text-[10px] uppercase tracking-wider text-accent border border-accent/30 rounded px-1.5 py-0.5">
+                              {r.doc.status}
+                            </span>
+                          )}
                         </span>
                         {r.snippet && (
                           <span className="text-xs text-muted/80 line-clamp-2">
-                            {r.snippet}
+                            {highlight(r.snippet, query)}
                           </span>
                         )}
                       </button>

@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 function GithubIcon({ className }: { className?: string }) {
   return (
     <svg viewBox="0 0 24 24" className={className} fill="currentColor">
@@ -28,9 +30,9 @@ export function Footer() {
           <a href="https://github.com/levizr/morph" target="_blank" rel="noopener noreferrer" className="hover:text-foreground transition-colors">
             GitHub
           </a>
-          <a href="https://github.com/levizr/morph/blob/main/docs" target="_blank" rel="noopener noreferrer" className="hover:text-foreground transition-colors">
+          <Link href="/docs" className="hover:text-foreground transition-colors">
             Docs
-          </a>
+          </Link>
           <a href="https://github.com/levizr/morph/blob/main/LICENSE" target="_blank" rel="noopener noreferrer" className="hover:text-foreground transition-colors">
             License
           </a>

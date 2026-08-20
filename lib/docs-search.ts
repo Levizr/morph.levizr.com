@@ -6,6 +6,10 @@ export interface DocIndexEntry {
   section: string;
   headings: string[];
   text: string;
+  description: string;
+  keywords: string[];
+  status: string;
+  priority: number;
 }
 
 function extractHeadings(md: string): string[] {
@@ -38,6 +42,10 @@ export async function fetchDocsSearchIndex(): Promise<DocIndexEntry[]> {
         section: doc.section,
         headings: extractHeadings(md),
         text: markdownToText(md).slice(0, 4000),
+        description: doc.description ?? "",
+        keywords: doc.keywords ?? [],
+        status: doc.status ?? "production",
+        priority: doc.priority ?? 0.5,
       } satisfies DocIndexEntry;
     })
   );

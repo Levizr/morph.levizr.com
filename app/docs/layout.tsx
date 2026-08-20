@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { fetchDocsNav } from "@/lib/github-docs";
 import { DocsSidebar } from "./DocsSidebar";
+import { DocsMobileNav } from "./DocsMobileNav";
 import { DocsSearch } from "./DocsSearch";
 import { Navbar } from "@/app/components/Navbar";
 import { Footer } from "@/app/components/Footer";
@@ -33,12 +34,15 @@ export default async function DocsLayout({
             </aside>
 
             <main className="min-w-0 max-w-3xl">
-              <Link
-                href="/docs"
-                className="lg:hidden inline-flex items-center gap-2 text-sm text-muted hover:text-foreground transition-colors mb-6"
-              >
-                ← All docs
-              </Link>
+              <div className="lg:hidden flex items-center justify-between mb-6">
+                <Link
+                  href="/docs"
+                  className="inline-flex items-center gap-2 text-sm text-muted hover:text-foreground transition-colors"
+                >
+                  ← All docs
+                </Link>
+                <DocsMobileNav docs={docs} />
+              </div>
               {children}
             </main>
           </div>
