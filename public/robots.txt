@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://morph.levizr.com/sitemap.xml
+Sitemap: https://morph.levizr.com/docs/sitemap.xml
