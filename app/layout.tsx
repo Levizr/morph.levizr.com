@@ -30,6 +30,10 @@ export const metadata: Metadata = {
     "compiler",
     "levizr",
   ],
+  icons: {
+    icon: "/favicon.ico",
+    apple: "/apple-touch-icon.png",
+  },
   openGraph: {
     title: "Morph — Native UI from JSX + CSS",
     description:
