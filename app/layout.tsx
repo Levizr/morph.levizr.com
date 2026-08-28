@@ -31,7 +31,6 @@ export const metadata: Metadata = {
     "levizr",
   ],
   icons: {
-    icon: "/favicon.ico",
     apple: "/apple-touch-icon.png",
   },
   openGraph: {
