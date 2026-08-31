@@ -5,6 +5,7 @@ import { Features } from "./components/Features";
 import { Architecture } from "./components/Architecture";
 import { CodeExample } from "./components/CodeExample";
 import { CLI } from "./components/CLI";
+import { ContributeSection } from "./components/ContributeSection";
 import { CTA } from "./components/CTA";
 import { Footer } from "./components/Footer";
 
@@ -19,6 +20,7 @@ export default function Home() {
         <Architecture />
         <CodeExample />
         <CLI />
+        <ContributeSection />
         <CTA />
       </main>
       <Footer />
