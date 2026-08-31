@@ -29,27 +29,27 @@ import { stagger, fadeUp } from "@/lib/animations";
 const whyReasons = [
   {
     icon: Rocket,
-    title: "Ship something genuinely new",
+    title: "Help a real framework grow",
     description:
-      "There is no mainstream compiler-based UI framework that turns JSX + CSS into native binaries with OpenGL rendering — and addresses the real cost of 'easy' native UIs. Morph is building it, one crate at a time. This is frontier work, not another Electron wrapper.",
+      "Morph turns your code into fast, lightweight native desktop apps — no browser, no Electron. It's early and full of opportunity. Every contribution helps it grow into something thousands of developers rely on.",
   },
   {
     icon: Code2,
-    title: "Deep systems-level work",
+    title: "Build the future of native apps",
     description:
-      "Morph is a full compiler stack: a JSX/TSX parser (Oxc), a CSS parser (lightningcss), an intermediate representation, C++/Rust codegen, a C++ runtime, and an OpenGL renderer. It is not a React wrapper — it is a genuine compiler you can sink your teeth into.",
+      "There's no mainstream framework that gives you the web developer experience while shipping true native desktop apps. Morph is building that — and it needs people who want to be part of shaping it from the ground up.",
   },
   {
-    icon: Cpu,
-    title: "Morphc: a Rust rewrite underway now",
+    icon: Users,
+    title: "Your skill makes a real difference",
     description:
-      "The proven Python prototype is being rewritten in Rust as `morphc` — a single native binary with no Python dependency, instant `morph dev`, and parallel compilation. There is real, concrete work on the compiler, parser, and IR waiting for contributors right now.",
+      "Whether you're strong at rendering, layouts, docs, examples, or testing — there's a place for you. Small, focused contributions add up quickly and get reviewed fast.",
   },
   {
     icon: Star,
     title: "Early-stage, real impact",
     description:
-      "Every contribution lands at the architectural layer — the design decisions you help make will define how developers ship native apps. Your name goes on something that thousands of people could build on. And small PRs get reviewed and merged fast.",
+      "Every contribution lands at the architectural layer — the design decisions you help make will define how developers ship native apps. Your name goes on something real, and your work directly helps Morph grow.",
   },
 ];
 
@@ -95,16 +95,16 @@ const crates = [
 const areas = [
   {
     icon: Cpu,
-    title: "The Rust compiler (morphc)",
+    title: "Compiler & Tooling",
     gradient: "from-violet-500 to-purple-600",
     difficulty: "Advanced",
     description:
-      "Work where the action is: the Rust rewrite that replaces the Python toolchain. Contribute to the parser, IR, codegen, or build system — much of phases 6 and 7 (dev mode, polish, CI/CD) is still open.",
+      "Morph's toolchain needs contributors to keep improving how quickly and reliably your code turns into a native app. Help with performance, hot reload, error messages, and build quality.",
     tasks: [
-      "Finish dev mode: watch + IPC, hot reload",
-      "Polish: check, doctor, CI/CD, distribution",
-      "Optimize compile speed and emit quality",
-      "Add source maps and better error messages",
+      "Improve dev mode: watch + hot reload",
+      "Speed up builds and app startup",
+      "Make error messages clearer",
+      "Add polish: check, doctor, CI/CD, distribution",
     ],
   },
   {
@@ -248,11 +248,12 @@ export default function ContributePage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.25 }}
             >
-              Morph is a Rust-based compiler and native UI framework — no browser, no
-              Electron, no Python. Just your JSX and CSS compiled to a native binary with
-              OpenGL rendering. It was started by a single author who refused to accept
-              that {"this didn't"} exist. It {"can't"} be finished by one person. {"That's"} where
-              you come in.
+Morph is a framework that turns your code into a native desktop app — no
+browser, no Electron. Write your UI with web tools you already know, and ship
+a fast, lightweight app with OpenGL rendering. It was started by a single
+author who refused to accept that {"this didn't"} exist. It {"can't"} be finished
+by one person. {"That's"} where you come in — and why your contribution helps
+Morph grow.
             </motion.p>
 
             <motion.div
