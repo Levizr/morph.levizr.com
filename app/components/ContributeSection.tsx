@@ -139,6 +139,16 @@ export function ContributeSection() {
           <p className="mt-4 text-sm text-muted">
             First-time contributor? <span className="text-accent font-medium">Clone the repo, run cargo build,</span> and find an issue to fix.
           </p>
+          <p className="mt-2 text-sm text-muted">
+            Want the internals first?{" "}
+            <motion.a
+              href="/dev/docs"
+              className="text-accent font-medium hover:underline"
+              whileHover={{ x: 2 }}
+            >
+              Read the dev docs →
+            </motion.a>
+          </p>
         </motion.div>
       </div>
     </section>

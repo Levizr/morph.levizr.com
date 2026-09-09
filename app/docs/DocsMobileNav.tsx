@@ -5,7 +5,13 @@ import { Menu, X } from "lucide-react";
 import { DocsSidebar } from "./DocsSidebar";
 import type { DocEntry } from "@/lib/github-docs";
 
-export function DocsMobileNav({ docs }: { docs: DocEntry[] }) {
+export function DocsMobileNav({
+  docs,
+  base = "/docs",
+}: {
+  docs: DocEntry[];
+  base?: string;
+}) {
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
@@ -60,7 +66,7 @@ export function DocsMobileNav({ docs }: { docs: DocEntry[] }) {
                 if ((e.target as HTMLElement).closest("a")) setOpen(false);
               }}
             >
-              <DocsSidebar docs={docs} />
+              <DocsSidebar docs={docs} base={base} />
             </div>
           </div>
         </div>

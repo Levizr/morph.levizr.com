@@ -57,9 +57,17 @@ function Chevron({ open }: { open: boolean }) {
   );
 }
 
-export function DocsSidebar({ docs }: { docs: DocEntry[] }) {
+export function DocsSidebar({
+  docs,
+  base = "/docs",
+}: {
+  docs: DocEntry[];
+  base?: string;
+}) {
   const pathname = usePathname();
-  const activePath = pathname.replace(/^\/docs\//, "");
+  const activePath = pathname.startsWith(`${base}/`)
+    ? pathname.slice(base.length + 1)
+    : "";
 
   const sections = useMemo(
     () =>
@@ -120,7 +128,7 @@ export function DocsSidebar({ docs }: { docs: DocEntry[] }) {
     const key = `${section}/${path}`;
 
     if (node.doc) {
-      const href = `/docs/${node.doc.path}`;
+      const href = `${base}/${node.doc.path}`;
       const active = pathname === href;
       return (
         <Link

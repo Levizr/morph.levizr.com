@@ -38,6 +38,9 @@ export function renderMarkdown(
     if (!linkTitle && target.startsWith("/docs/")) {
       const page = target.replace(/^\/docs\//, "").split("#")[0];
       linkTitle = meta.descriptions?.get(page) ?? "";
+    } else if (!linkTitle && target.startsWith("/dev/docs/")) {
+      const page = target.replace(/^\/dev\/docs\//, "").split("#")[0];
+      linkTitle = meta.descriptions?.get(page) ?? "";
     }
     const attrs = [
       external ? 'target="_blank" rel="noopener noreferrer"' : "",

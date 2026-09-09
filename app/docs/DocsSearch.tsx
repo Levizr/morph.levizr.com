@@ -95,7 +95,13 @@ function highlight(text: string, query: string): React.ReactNode {
   );
 }
 
-export function DocsSearch() {
+export function DocsSearch({
+  base = "/docs",
+  api = "/api/docs/search",
+}: {
+  base?: string;
+  api?: string;
+} = {}) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [index, setIndex] = useState<DocIndexEntry[] | null>(null);
@@ -164,7 +170,7 @@ export function DocsSearch() {
     let cancelled = false;
     (async () => {
       try {
-        const res = await fetch("/api/docs/search");
+        const res = await fetch(api);
         const data = await res.json();
         if (!cancelled) setIndex(Array.isArray(data.docs) ? data.docs : []);
       } catch {
@@ -174,7 +180,7 @@ export function DocsSearch() {
     return () => {
       cancelled = true;
     };
-  }, [open, index]);
+  }, [open, index, api]);
 
   const onInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "ArrowDown") {
@@ -187,7 +193,7 @@ export function DocsSearch() {
       const r = results[active];
       if (r) {
         setOpen(false);
-        router.push(`/docs/${r.doc.path}`);
+        router.push(`${base}/${r.doc.path}`);
       }
     }
   };
@@ -247,7 +253,7 @@ export function DocsSearch() {
                         onMouseEnter={() => setActive(i)}
                         onClick={() => {
                           setOpen(false);
-                          router.push(`/docs/${r.doc.path}`);
+                          router.push(`${base}/${r.doc.path}`);
                         }}
                         className={`w-full flex flex-col gap-0.5 px-4 py-2.5 text-left transition-colors ${
                           i === active

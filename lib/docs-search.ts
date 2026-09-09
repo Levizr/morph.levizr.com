@@ -1,4 +1,10 @@
-import { fetchDocsNav, fetchDocMarkdown } from "@/lib/github-docs";
+import {
+  fetchDevDocMarkdown,
+  fetchDevDocsNav,
+  fetchDocMarkdown,
+  fetchDocsNav,
+  type DocEntry,
+} from "@/lib/github-docs";
 
 export interface DocIndexEntry {
   path: string;
@@ -30,11 +36,14 @@ function markdownToText(md: string): string {
     .trim();
 }
 
-export async function fetchDocsSearchIndex(): Promise<DocIndexEntry[]> {
-  const docs = await fetchDocsNav();
+export async function fetchDocsSearchIndex(
+  navFn: () => Promise<DocEntry[]> = fetchDocsNav,
+  mdFn: (slug: string[]) => Promise<string | null> = fetchDocMarkdown
+): Promise<DocIndexEntry[]> {
+  const docs = await navFn();
   const entries = await Promise.all(
     docs.map(async (doc) => {
-      const md = await fetchDocMarkdown((doc.file ?? doc.path).split("/"));
+      const md = await mdFn((doc.file ?? doc.path).split("/"));
       if (!md) return null;
       return {
         path: doc.path,
@@ -50,4 +59,8 @@ export async function fetchDocsSearchIndex(): Promise<DocIndexEntry[]> {
     })
   );
   return entries.filter((e): e is DocIndexEntry => e !== null);
+}
+
+export function fetchDevDocsSearchIndex(): Promise<DocIndexEntry[]> {
+  return fetchDocsSearchIndex(fetchDevDocsNav, fetchDevDocMarkdown);
 }

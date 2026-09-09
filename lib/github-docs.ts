@@ -2,10 +2,14 @@ const OWNER = "Levizr";
 const REPO = "morph";
 const BRANCH = "main";
 const DOCS_DIR = "docs";
+const DEV_DOCS_DIR = "docs/dev";
+export const DEV_BASE = "/dev/docs";
 
 export const DOCS_TAG = "morph-docs";
 export const DOCS_TREE_TAG = "morph-docs-tree";
 export const NAV_TAG = "navigation-menu";
+export const DEV_DOCS_TAG = "morph-dev-docs";
+export const DEV_NAV_TAG = "dev-navigation-menu";
 
 export interface DocEntry {
   path: string;
@@ -58,55 +62,76 @@ function normalizeTitle(title: string, slug: string): string {
     .replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
-export async function fetchDocsNav(): Promise<DocEntry[]> {
+function parseRegistryEntries(data: unknown): DocEntry[] {
+  const sections = Array.isArray(data)
+    ? (data as SidebarSection[])
+    : (data as { sections?: SidebarSection[] }).sections;
+  if (!Array.isArray(sections)) return [];
+  const entries: DocEntry[] = [];
+  for (const section of sections) {
+    if (!section || !Array.isArray(section.items)) continue;
+    const category = section.category ?? "General";
+    for (const item of section.items) {
+      if (!item || typeof item.slug !== "string") continue;
+      const slug = item.slug.replace(/\.md$/, "");
+      if (!slug) continue;
+      const file = item.file ? item.file.replace(/\.md$/, "") : slug;
+      entries.push({
+        path: slug,
+        file,
+        title: normalizeTitle(item.title ?? "", slug),
+        section: category,
+        status: item.status,
+        author: item.author,
+        description: item.description,
+        keywords: item.keywords,
+        lastUpdated: item.lastUpdated,
+        publishedAt: item.publishedAt,
+        priority: item.priority,
+        changefreq: item.changefreq,
+      });
+    }
+  }
+  return entries;
+}
+
+async function fetchRegistryNav(
+  registryFile: string,
+  tags: string[]
+): Promise<DocEntry[]> {
   const res = await fetch(
-    `https://raw.githubusercontent.com/${OWNER}/${REPO}/${BRANCH}/${DOCS_DIR}/docs.registry.json`,
+    `https://raw.githubusercontent.com/${OWNER}/${REPO}/${BRANCH}/${DOCS_DIR}/${registryFile}`,
     {
       headers: headers(),
       cache: "force-cache",
-      next: { revalidate: false, tags: [NAV_TAG, DOCS_TREE_TAG] },
+      next: { revalidate: false, tags },
     }
   );
 
   if (res.ok) {
-    let data: SidebarSection[] | { sections?: SidebarSection[] };
     try {
-      data = await res.json();
+      const data: unknown = await res.json();
+      return parseRegistryEntries(data);
     } catch {
-      return fetchDocsTree();
-    }
-    const sections = Array.isArray(data) ? data : data.sections;
-    if (Array.isArray(sections)) {
-      const entries: DocEntry[] = [];
-      for (const section of sections) {
-        if (!section || !Array.isArray(section.items)) continue;
-        const category = section.category ?? "General";
-        for (const item of section.items) {
-          if (!item || typeof item.slug !== "string") continue;
-          const slug = item.slug.replace(/\.md$/, "");
-          if (!slug) continue;
-          const file = item.file ? item.file.replace(/\.md$/, "") : slug;
-          entries.push({
-            path: slug,
-            file,
-            title: normalizeTitle(item.title ?? "", slug),
-            section: category,
-            status: item.status,
-            author: item.author,
-            description: item.description,
-            keywords: item.keywords,
-            lastUpdated: item.lastUpdated,
-            publishedAt: item.publishedAt,
-            priority: item.priority,
-            changefreq: item.changefreq,
-          });
-        }
-      }
-      if (entries.length > 0) return entries;
+      return [];
     }
   }
+  return [];
+}
 
+export async function fetchDocsNav(): Promise<DocEntry[]> {
+  const entries = await fetchRegistryNav("docs.registry.json", [
+    NAV_TAG,
+    DOCS_TREE_TAG,
+  ]);
+  if (entries.length > 0) return entries;
   return fetchDocsTree();
+}
+
+export async function fetchDevDocsNav(): Promise<DocEntry[]> {
+  const entries = await fetchRegistryNav("dev.registry.json", [DEV_NAV_TAG]);
+  if (entries.length > 0) return entries;
+  return fetchDevDocsTree();
 }
 
 export async function fetchDocsTree(): Promise<DocEntry[]> {
@@ -145,18 +170,66 @@ export async function fetchDocsTree(): Promise<DocEntry[]> {
   return entries;
 }
 
-export async function fetchDocMarkdown(slug: string[]): Promise<string | null> {
-  const repoPath = `${DOCS_DIR}/${slug.join("/")}.md`;
+async function fetchMarkdownFile(
+  repoPath: string,
+  tags: string[]
+): Promise<string | null> {
   const res = await fetch(
     `https://raw.githubusercontent.com/${OWNER}/${REPO}/${BRANCH}/${repoPath}`,
     {
       headers: headers(),
       cache: "force-cache",
-      next: { revalidate: false, tags: [DOCS_TAG, `doc-${slug.join("/")}`] },
+      next: { revalidate: false, tags },
     }
   );
   if (!res.ok) return null;
   return res.text();
+}
+
+export async function fetchDocMarkdown(slug: string[]): Promise<string | null> {
+  const repoPath = `${DOCS_DIR}/${slug.join("/")}.md`;
+  return fetchMarkdownFile(repoPath, [DOCS_TAG, `doc-${slug.join("/")}`]);
+}
+
+export async function fetchDevDocMarkdown(
+  slug: string[]
+): Promise<string | null> {
+  const repoPath = `${DEV_DOCS_DIR}/${slug.join("/")}.md`;
+  return fetchMarkdownFile(repoPath, [DEV_DOCS_TAG, `dev-doc-${slug.join("/")}`]);
+}
+
+export async function fetchDevDocsTree(): Promise<DocEntry[]> {
+  const res = await fetch(
+    `https://api.github.com/repos/${OWNER}/${REPO}/git/trees/${BRANCH}?recursive=1`,
+    {
+      headers: headers(),
+      cache: "force-cache",
+      next: { revalidate: false, tags: [DEV_NAV_TAG] },
+    }
+  );
+  if (!res.ok) return [];
+
+  const data = (await res.json()) as { tree?: { path?: string; type?: string }[] };
+  const entries = (data.tree ?? [])
+    .filter(
+      (item) =>
+        item.type === "blob" &&
+        item.path?.startsWith(`${DEV_DOCS_DIR}/`) &&
+        item.path.endsWith(".md")
+    )
+    .map((item) => {
+      const path = item.path!;
+      const name = path.slice(DEV_DOCS_DIR.length + 1).replace(/\.md$/, "");
+      const title = name
+        .split("/")
+        .pop()!
+        .replace(/[-_]/g, " ")
+        .replace(/\b\w/g, (c) => c.toUpperCase());
+      return { path: name, file: `dev/${name}`, title, section: "Dev" };
+    })
+    .sort((a, b) => a.path.localeCompare(b.path));
+
+  return entries;
 }
 
 export function normalizePath(path: string): string {
@@ -209,6 +282,13 @@ export function resolveDocLink(href: string, currentPath: string): string {
     }
     let page = resolved.replace(/\.md$/, "");
     if (page.startsWith(DOCS_DIR)) page = page.slice(DOCS_DIR.length + 1);
+    // Pages under docs/dev/ belong to the dev track (/dev/docs/…);
+    // everything else belongs to the user track (/docs/…).
+    if (page === "dev" || page.startsWith("dev/")) {
+      return `${DEV_BASE}/${page === "dev" ? "" : page.slice(4)}${
+        hash ? `#${hash}` : ""
+      }`;
+    }
     return `/docs/${page}${hash ? `#${hash}` : ""}`;
   }
 

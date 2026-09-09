@@ -11,6 +11,7 @@ const NAV_ITEMS = [
   { id: "code", label: "Code" },
   { id: "cli", label: "CLI" },
   { href: "/docs", label: "Docs" },
+  { href: "/dev/docs", label: "Dev Docs" },
 ];
 
 export function Navbar() {
