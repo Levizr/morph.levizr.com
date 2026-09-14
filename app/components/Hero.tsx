@@ -151,9 +151,19 @@ export function Hero() {
             >
               $
             </motion.span>
-            <span className="whitespace-nowrap">pip install levizr-morph</span>
+            <span className="whitespace-nowrap">curl -fsSL https://morph.levizr.com/install.sh | sh</span>
           </motion.div>
         </motion.div>
+
+        <motion.p
+          className="text-xs sm:text-sm text-muted/80 font-mono mt-3"
+          variants={fadeUp}
+          initial="hidden"
+          animate="visible"
+          transition={{ ...smooth, delay: 0.95 }}
+        >
+          or with Cargo: <span className="text-muted">cargo install morphc</span>
+        </motion.p>
 
         {/* Code preview - fixed visibility on scroll */}
         <motion.div

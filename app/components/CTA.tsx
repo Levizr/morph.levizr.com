@@ -80,8 +80,11 @@ export function CTA() {
                 >
                   $
                 </motion.span>
-                <span>pip install levizr-morph</span>
+                <span>curl -fsSL https://morph.levizr.com/install.sh | sh</span>
               </motion.div>
+              <p className="text-xs sm:text-sm text-muted/70 font-mono -mt-2">
+                or with Cargo: <span className="text-muted">cargo install morphc</span>
+              </p>
 
               <motion.a
                 href="https://github.com/levizr/morph"
