@@ -58,7 +58,19 @@ const crates = [
     name: "morphc",
     role: "CLI binary",
     description:
-      "The `morph` command — init, install, dev, build, run, check, doctor, translate. clap-based CLI, version management, hot-reload IPC.",
+      "The `morph` command — new, install, update, dev, build, run, check, doctor, cache, plus direct file morphing (`morph app.ts --to cpp|rust`). clap-based CLI, version management, hot-reload over loopback TCP.",
+  },
+  {
+    name: "morpher",
+    role: "TS → C++ translator",
+    description:
+      "Intent-based codegen: escape analysis picks stack, unique_ptr, or shared_ptr, with native types (int32_t, std::string) by default and --type strict for Js* wrappers.",
+  },
+  {
+    name: "morph-cache",
+    role: "Runtime + CSS cache",
+    description:
+      "Global cache under ~/.morph/cache — versioned C++ runtimes, remote CSS and @font-face files, fingerprints for incremental builds.",
   },
   {
     name: "morph-parser",
@@ -187,10 +199,10 @@ const gettingStarted = [
   },
   {
     step: 2,
-    title: "Build the Rust compiler",
-    code: "cargo build",
+    title: "Build the Rust workspace",
+    code: "cargo build --workspace\ntarget/debug/morph doctor",
     description:
-      "Morph's toolchain is written in Rust and compiled with cargo. Run cargo build and you have the morphc compiler binary. No Python, no pip — that's the whole point of the rewrite.",
+      "The entire toolchain is Rust — one Cargo workspace, no Python to install. Build everything, then verify your C++ toolchain and graphics libs with morph doctor.",
   },
   {
     step: 3,
@@ -201,8 +213,8 @@ const gettingStarted = [
   {
     step: 4,
     title: "Submit a PR",
-    code: "git checkout -b my-feature\ngit commit -m 'feat: add X'\ngit push origin my-feature",
-    description: "Keep PRs focused, add tests where possible, and open the pull request. The maintainer reviews quickly.",
+    code: "cargo test --workspace\ngit checkout -b my-feature\ngit commit -m 'feat: add X'\ngit push origin my-feature",
+    description: "Run cargo fmt and the workspace tests first, keep PRs focused to one fix or feature, and open the pull request. The maintainer reviews quickly.",
   },
 ];
 
@@ -370,18 +382,20 @@ Morph grow.
                     to dead-code elimination.
                   </p>
                   <p>
-                    The toolchain is written in <strong className="text-foreground">Rust</strong>. The new compiler
-                    binary, <code className="px-1.5 py-0.5 rounded-md bg-surface text-foreground text-sm font-mono">morphc</code>, replaces
-                    the original Python prototype: {"it's"} a single, fast binary compiled with{" "}
-                    <code className="px-1.5 py-0.5 rounded-md bg-surface text-foreground text-sm font-mono">cargo build</code>, parsing
+                    The toolchain is written in <strong className="text-foreground">Rust</strong>. The compiler
+                    binary, <code className="px-1.5 py-0.5 rounded-md bg-surface text-foreground text-sm font-mono">morph</code> (crate{" "}
+                    <code className="px-1.5 py-0.5 rounded-md bg-surface text-foreground text-sm font-mono">morphc</code>), is a single, fast binary compiled with{" "}
+                    <code className="px-1.5 py-0.5 rounded-md bg-surface text-foreground text-sm font-mono">cargo build --workspace</code>, parsing
                     JSX/TSX with Oxc and CSS with lightningcss, lowering to a typed IR, and
                     emitting C++ (with a future Rust runtime).
                   </p>
                   <p>
                     The dev experience mirrors the web:{" "}
                     <code className="px-1.5 py-0.5 rounded-md bg-surface text-foreground text-sm font-mono">morph dev</code> watches
-                    your files, recompiles only what changed, and hot-swaps it via{" "}
-                    <code className="px-1.5 py-0.5 rounded-md bg-surface text-foreground text-sm font-mono">dlopen</code> — the window
+                    your files, recompiles only the logic layer, and pushes IR over loopback TCP
+                    to the running window — hot-swapping the new{" "}
+                    <code className="px-1.5 py-0.5 rounded-md bg-surface text-foreground text-sm font-mono">logic.so</code> via{" "}
+                    <code className="px-1.5 py-0.5 rounded-md bg-surface text-foreground text-sm font-mono">dlopen</code>. The window
                     never restarts.
                   </p>
                 </div>
@@ -634,7 +648,7 @@ Morph grow.
                     icon: Shield,
                     title: "Code quality matters",
                     description:
-                      "Write clear, readable code and follow the existing patterns in the codebase. New Rust crates and modules follow the workspace conventions in the repo.",
+                      "Write clear, readable code and follow the existing patterns in the codebase. Rust must be `cargo fmt` clean with no new warnings; C++ runtime headers stay header-only.",
                   },
                   {
                     icon: Lightbulb,
@@ -646,7 +660,7 @@ Morph grow.
                     icon: Bug,
                     title: "Test what you change",
                     description:
-                      "Add tests when possible. For rendering and layout changes, include before/after screenshots or reproduction steps.",
+                      "Add tests when possible — `cargo test --workspace` plus the morpher fixture tests. For rendering and layout changes, include before/after screenshots or reproduction steps.",
                   },
                   {
                     icon: Cog,

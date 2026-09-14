@@ -30,6 +30,12 @@ export function Footer() {
           <a href="https://github.com/levizr/morph" target="_blank" rel="noopener noreferrer" className="hover:text-foreground transition-colors">
             GitHub
           </a>
+          <Link href="/download" className="hover:text-foreground transition-colors">
+            Download
+          </Link>
+          <Link href="/contribute" className="hover:text-foreground transition-colors">
+            Contribute
+          </Link>
           <Link href="/docs" className="hover:text-foreground transition-colors">
             Docs
           </Link>

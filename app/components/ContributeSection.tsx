@@ -4,6 +4,8 @@ import { motion } from "framer-motion";
 import {
   GitBranch,
   Cpu,
+  Code2,
+  Boxes,
   Paintbrush,
   BookOpen,
   Bug,
@@ -17,8 +19,20 @@ const areas = [
   {
     icon: Cpu,
     title: "The Rust Compiler",
-    description: "Work on morphc — the Rust rewrite of the toolchain. Parsing, IR, codegen, and build system all need contributors right now.",
+    description: "Work on morphc — the morph CLI (new, dev, build, run, check, doctor). Parsing, IR, codegen, and build system all need contributors right now.",
     gradient: "from-violet-500 to-purple-600",
+  },
+  {
+    icon: Code2,
+    title: "TS → C++ Translator",
+    description: "Work on morpher — intent-based codegen that turns everyday JavaScript into native C++. Escape analysis, native types, broader builtin coverage.",
+    gradient: "from-fuchsia-500 to-violet-600",
+  },
+  {
+    icon: Boxes,
+    title: "Parser, IR & Cache",
+    description: "Oxc JSX/TSX parsing, lightningcss + Tailwind resolution, the typed IR, and the global cache under ~/.morph/cache.",
+    gradient: "from-sky-500 to-blue-600",
   },
   {
     icon: Paintbrush,
@@ -84,7 +98,7 @@ export function ContributeSection() {
 
         {/* Contribution areas */}
         <motion.div
-          className="grid grid-cols-1 sm:grid-cols-2 gap-5 mb-12"
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 mb-12"
           variants={stagger}
           initial="hidden"
           whileInView="visible"
@@ -137,7 +151,7 @@ export function ContributeSection() {
             </motion.span>
           </motion.a>
           <p className="mt-4 text-sm text-muted">
-            First-time contributor? <span className="text-accent font-medium">Clone the repo, run cargo build,</span> and find an issue to fix.
+            First-time contributor? <span className="text-accent font-medium">Clone the repo, run cargo build --workspace,</span> and find an issue to fix.
           </p>
           <p className="mt-2 text-sm text-muted">
             Want the internals first?{" "}

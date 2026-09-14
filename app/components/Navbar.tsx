@@ -8,8 +8,8 @@ import { useState, useEffect } from "react";
 const NAV_ITEMS = [
   { id: "features", label: "Features" },
   { id: "how-it-works", label: "How it Works" },
-  { id: "code", label: "Code" },
-  { id: "cli", label: "CLI" },
+  { href: "/download", label: "Download" },
+  { href: "/contribute", label: "Contribute" },
   { href: "/docs", label: "Docs" },
   { href: "/dev/docs", label: "Dev Docs" },
 ];
