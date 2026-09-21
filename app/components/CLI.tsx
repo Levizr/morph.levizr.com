@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import Link from "next/link";
 
 const commands = [
   { cmd: "morph new my-app", desc: "Scaffold a new project" },
@@ -70,9 +71,9 @@ export function CLI() {
 
         <p className="mt-6 text-center text-sm text-muted">
           Full reference:{" "}
-          <a href="/docs/cli/commands" className="text-accent hover:underline">
+          <Link href="/docs/cli/commands" className="text-accent hover:underline">
             morph check, update, cache and file morphing →
-          </a>
+          </Link>
         </p>
       </div>
     </section>

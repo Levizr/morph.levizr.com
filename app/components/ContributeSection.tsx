@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import Link from "next/link";
 import {
   GitBranch,
   Cpu,
@@ -14,6 +15,8 @@ import {
 } from "lucide-react";
 import { useIsMobile } from "@/lib/useIsMobile";
 import { stagger, fadeUp } from "@/lib/animations";
+
+const MotionLink = motion.create(Link);
 
 const areas = [
   {
@@ -131,7 +134,7 @@ export function ContributeSection() {
           viewport={{ once: true }}
           transition={{ duration: 0.6, delay: 0.3 }}
         >
-          <motion.a
+          <MotionLink
             href="/contribute"
             className="group inline-flex items-center gap-2 px-8 py-4 rounded-xl bg-accent text-accent-fg font-semibold text-base shadow-lg shadow-accent/25"
             whileHover={{
@@ -149,19 +152,19 @@ export function ContributeSection() {
             >
               <ArrowRight className="w-4 h-4" />
             </motion.span>
-          </motion.a>
+          </MotionLink>
           <p className="mt-4 text-sm text-muted">
             First-time contributor? <span className="text-accent font-medium">Clone the repo, run cargo build --workspace,</span> and find an issue to fix.
           </p>
           <p className="mt-2 text-sm text-muted">
             Want the internals first?{" "}
-            <motion.a
+            <MotionLink
               href="/dev/docs"
               className="text-accent font-medium hover:underline"
               whileHover={{ x: 2 }}
             >
               Read the dev docs →
-            </motion.a>
+            </MotionLink>
           </p>
         </motion.div>
       </div>

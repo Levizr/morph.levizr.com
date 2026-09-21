@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import Link from "next/link";
 import { ThemeToggle } from "./ThemeToggle";
 import { Menu, X } from "lucide-react";
 import { useState, useEffect } from "react";
@@ -13,6 +14,8 @@ const NAV_ITEMS = [
   { href: "/docs", label: "Docs" },
   { href: "/dev/docs", label: "Dev Docs" },
 ];
+
+const MotionLink = motion.create(Link);
 
 export function Navbar() {
   const [scrolled, setScrolled] = useState(false);
@@ -33,7 +36,7 @@ export function Navbar() {
       }`}
     >
       <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
-        <motion.a
+        <MotionLink
           href="/"
           className="flex items-center gap-2.5 group"
           initial={{ opacity: 0, x: -20 }}
@@ -60,7 +63,7 @@ export function Navbar() {
             </svg>
           </motion.div> */}
           <span className="text-lg font-bold tracking-tight">Morph</span>
-        </motion.a>
+        </MotionLink>
 
         <motion.div
           className="hidden sm:flex items-center gap-8 text-sm font-medium text-muted"
@@ -68,17 +71,29 @@ export function Navbar() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
         >
-          {NAV_ITEMS.map((item) => (
-            <motion.a
-              key={item.label}
-              href={item.href ?? `/#${item.id}`}
-              className="relative hover:text-foreground transition-colors"
-              whileHover={{ y: -1 }}
-              transition={{ duration: 0.2 }}
-            >
-              {item.label}
-            </motion.a>
-          ))}
+          {NAV_ITEMS.map((item) =>
+            item.href ? (
+              <MotionLink
+                key={item.label}
+                href={item.href}
+                className="relative hover:text-foreground transition-colors"
+                whileHover={{ y: -1 }}
+                transition={{ duration: 0.2 }}
+              >
+                {item.label}
+              </MotionLink>
+            ) : (
+              <motion.a
+                key={item.label}
+                href={`/#${item.id}`}
+                className="relative hover:text-foreground transition-colors"
+                whileHover={{ y: -1 }}
+                transition={{ duration: 0.2 }}
+              >
+                {item.label}
+              </motion.a>
+            )
+          )}
         </motion.div>
 
         <motion.div
@@ -113,16 +128,27 @@ export function Navbar() {
       {menuOpen && (
         <div className="sm:hidden border-t border-border">
           <div className="max-w-6xl mx-auto px-4 py-3 flex flex-col gap-1">
-            {NAV_ITEMS.map((item) => (
-              <a
-                key={item.label}
-                href={item.href ?? `/#${item.id}`}
-                onClick={() => setMenuOpen(false)}
-                className="px-3 py-2.5 rounded-lg text-sm text-muted hover:text-foreground hover:bg-surface transition-colors"
-              >
-                {item.label}
-              </a>
-            ))}
+            {NAV_ITEMS.map((item) =>
+              item.href ? (
+                <Link
+                  key={item.label}
+                  href={item.href}
+                  onClick={() => setMenuOpen(false)}
+                  className="px-3 py-2.5 rounded-lg text-sm text-muted hover:text-foreground hover:bg-surface transition-colors"
+                >
+                  {item.label}
+                </Link>
+              ) : (
+                <a
+                  key={item.label}
+                  href={`/#${item.id}`}
+                  onClick={() => setMenuOpen(false)}
+                  className="px-3 py-2.5 rounded-lg text-sm text-muted hover:text-foreground hover:bg-surface transition-colors"
+                >
+                  {item.label}
+                </a>
+              )
+            )}
           </div>
         </div>
       )}
