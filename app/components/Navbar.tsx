@@ -10,6 +10,7 @@ const NAV_ITEMS = [
   { id: "features", label: "Features" },
   { id: "how-it-works", label: "How it Works" },
   { href: "/download", label: "Download" },
+  { href: "/journey", label: "Journey" },
   { href: "/contribute", label: "Contribute" },
   { href: "/docs", label: "Docs" },
   { href: "/dev/docs", label: "Dev Docs" },

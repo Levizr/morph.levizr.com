@@ -26,7 +26,7 @@ export function Footer() {
           </a></span>
         </div>
 
-        <div className="flex items-center gap-4 sm:gap-6 text-sm text-muted">
+        <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 sm:gap-6 text-sm text-muted">
           <a href="https://github.com/levizr/morph" target="_blank" rel="noopener noreferrer" className="hover:text-foreground transition-colors">
             GitHub
           </a>
@@ -42,9 +42,6 @@ export function Footer() {
           <Link href="/dev/docs" className="hover:text-foreground transition-colors">
             Dev Docs
           </Link>
-          <a href="https://github.com/levizr/morph/blob/main/LICENSE" target="_blank" rel="noopener noreferrer" className="hover:text-foreground transition-colors">
-            License
-          </a>
           <a
             href="https://github.com/levizr/morph"
             target="_blank"
