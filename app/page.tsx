@@ -6,6 +6,7 @@ import { Architecture } from "./components/Architecture";
 import { CodeExample } from "./components/CodeExample";
 import { CLI } from "./components/CLI";
 import { ContributeSection } from "./components/ContributeSection";
+import { SponsorSection } from "./components/SponsorSection";
 import { CTA } from "./components/CTA";
 import { Footer } from "./components/Footer";
 
@@ -21,6 +22,7 @@ export default function Home() {
         <CodeExample />
         <CLI />
         <ContributeSection />
+        <SponsorSection />
         <CTA />
       </main>
       <Footer />

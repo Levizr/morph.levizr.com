@@ -36,6 +36,9 @@ export function Footer() {
           <Link href="/contribute" className="hover:text-foreground transition-colors">
             Contribute
           </Link>
+          <Link href="/sponsor" className="hover:text-foreground transition-colors">
+            Sponsor
+          </Link>
           <Link href="/docs" className="hover:text-foreground transition-colors">
             Docs
           </Link>
