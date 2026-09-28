@@ -52,6 +52,21 @@ currency on the Razorpay account so foreign cards can pay USD orders
 (they settle to INR automatically); INR orders work with UPI, cards, and
 netbanking out of the box.
 
+### Webhooks (don't skip)
+
+The browser callback (`/api/sponsor/verify`) is best-effort — closed
+tabs and dead networks lose it. `POST /api/sponsor/webhook` is the
+safety net: Razorpay retries it until every captured payment is recorded.
+
+1. Dashboard → Settings → Webhooks → Add New Webhook
+2. URL: `https://morph.levizr.com/api/sponsor/webhook`
+3. Events: `payment.captured`, `payment.failed`
+4. Copy the secret → `RAZORPAY_WEBHOOK_SECRET` in `.env.local` / Vercel env
+
+Signature (`x-razorpay-signature`, HMAC-SHA256 of the raw body) is
+checked on every delivery, unknown orders are acked without retry, and
+re-deliveries of paid orders are deduped.
+
 ## Scripts
 
 ```bash
