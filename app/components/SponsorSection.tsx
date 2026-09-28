@@ -8,9 +8,9 @@ import {
   Bug,
   BookOpen,
   Boxes,
-  ArrowRight,
   Sparkles,
 } from "lucide-react";
+import { DonateButton } from "./DonateButton";
 import { stagger, fadeUp } from "@/lib/animations";
 
 const MotionLink = motion.create(Link);
@@ -95,21 +95,7 @@ export function SponsorSection() {
           viewport={{ once: true }}
           transition={{ duration: 0.6, delay: 0.15 }}
         >
-          <motion.a
-            href={DONATE_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="group inline-flex w-full items-center justify-center gap-2 rounded-xl bg-accent px-8 py-4 text-base font-semibold text-accent-fg shadow-lg shadow-accent/25 sm:w-auto"
-            whileHover={{
-              scale: 1.04,
-              boxShadow: "0 20px 40px -12px rgba(109, 40, 217, 0.4)",
-            }}
-            whileTap={{ scale: 0.97 }}
-          >
-            <Heart className="h-4 w-4" />
-            Donate — one link
-            <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
-          </motion.a>
+          <DonateButton className="w-full sm:w-auto" />
           <MotionLink
             href="/sponsor"
             className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-border bg-surface px-8 py-4 text-base font-semibold transition-colors hover:bg-surface-hover sm:w-auto"
@@ -130,7 +116,16 @@ export function SponsorSection() {
         >
           <p className="text-sm text-muted">
             Every amount helps — server costs, test devices, and full-time work on
-            the compiler, renderer, and docs. UPI, cards, or netbanking.
+            the compiler, renderer, and docs. Prefer a direct link?{" "}
+            <a
+              href={DONATE_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-mono text-accent hover:underline"
+            >
+              razorpay.me/@levizr
+            </a>{" "}
+            — UPI, cards, or netbanking.
           </p>
         </motion.div>
 

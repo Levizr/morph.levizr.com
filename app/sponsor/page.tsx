@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { Navbar } from "@/app/components/Navbar";
 import { Footer } from "@/app/components/Footer";
+import { DonateButton } from "@/app/components/DonateButton";
 import { stagger, fadeUp } from "@/lib/animations";
 
 const DONATE_URL = "https://razorpay.me/@levizr";
@@ -143,21 +144,7 @@ export default function SponsorPage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.4 }}
             >
-              <motion.a
-                href={DONATE_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="group inline-flex w-full items-center justify-center gap-2 rounded-xl bg-accent px-8 py-4 text-base font-semibold text-accent-fg shadow-lg shadow-accent/25 sm:w-auto"
-                whileHover={{
-                  scale: 1.04,
-                  boxShadow: "0 20px 40px -12px rgba(109, 40, 217, 0.4)",
-                }}
-                whileTap={{ scale: 0.97 }}
-              >
-                <Heart className="h-4 w-4" />
-                Donate on Razorpay
-                <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
-              </motion.a>
+              <DonateButton className="w-full sm:w-auto" />
               <motion.a
                 href="#where-it-goes"
                 className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-border bg-surface px-8 py-4 text-base font-semibold transition-colors hover:bg-surface-hover sm:w-auto"
@@ -175,7 +162,7 @@ export default function SponsorPage() {
               animate={{ opacity: 1 }}
               transition={{ duration: 0.6, delay: 0.55 }}
             >
-              One link, no forms:{" "}
+              Prefer a direct link?{" "}
               <a
                 href={DONATE_URL}
                 target="_blank"
@@ -184,7 +171,7 @@ export default function SponsorPage() {
               >
                 razorpay.me/@levizr
               </a>{" "}
-              — UPI, cards, or netbanking.
+              — UPI, cards, or netbanking. Every amount helps.
             </motion.p>
           </div>
         </section>
