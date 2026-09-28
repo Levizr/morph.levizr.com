@@ -58,14 +58,44 @@ The browser callback (`/api/sponsor/verify`) is best-effort — closed
 tabs and dead networks lose it. `POST /api/sponsor/webhook` is the
 safety net: Razorpay retries it until every captured payment is recorded.
 
-1. Dashboard → Settings → Webhooks → Add New Webhook
-2. URL: `https://morph.levizr.com/api/sponsor/webhook`
-3. Events: `payment.captured`, `payment.failed`
-4. Copy the secret → `RAZORPAY_WEBHOOK_SECRET` in `.env.local` / Vercel env
+**Step-by-step setup (2 minutes):**
 
-Signature (`x-razorpay-signature`, HMAC-SHA256 of the raw body) is
-checked on every delivery, unknown orders are acked without retry, and
-re-deliveries of paid orders are deduped.
+1. Open the [Razorpay Dashboard](https://dashboard.razorpay.com) (use the
+   **Test Mode** toggle first to practice, repeat in **Live Mode** for real money)
+2. Go to **Settings** (gear icon, left sidebar) → **Webhooks** → **Add New Webhook**
+3. Webhook URL: `https://morph.levizr.com/api/sponsor/webhook`
+4. Under **Events**, tick exactly these two (leave everything else unticked):
+   - `payment.captured` — marks the donation `paid`
+   - `payment.failed` — marks the donation `failed`
+5. Set **Alert Email** to an address you read (you get mailed on repeated failures)
+6. Click **Create** → click the **eye icon** next to the new webhook to reveal
+   the **Webhook Secret** → copy it
+7. Save it as `RAZORPAY_WEBHOOK_SECRET` in `.env.local` (local) **and** in
+   Vercel → Project → Settings → Environment Variables (production), then
+   redeploy/restart so the new value loads
+
+**What our handler does with each event:**
+
+| Event              | Action                                                        |
+| ------------------ | ------------------------------------------------------------- |
+| `payment.captured` | Finds the donation by order id → marks `paid`, stores payment id |
+| `payment.failed`   | Finds the donation by order id → marks `failed`               |
+| anything else      | Ignored (200 OK, no retry)                                    |
+
+Security notes: every delivery must carry a valid `x-razorpay-signature`
+header (HMAC-SHA256 of the raw body, keyed with the secret) or it gets a
+400; deliveries for unknown orders are acked without retry (covers the
+dashboard's test pings); re-deliveries of paid orders are deduped.
+
+**Verify it works:** Dashboard → Settings → Webhooks → click the endpoint →
+**View Logs** shows every delivery + our status code. Then make a test
+donation and close the tab right after paying — the Mongo `donations`
+record must still flip to `paid` within a minute.
+
+**Local testing:** Razorpay can't reach `localhost`, so expose dev with a
+tunnel (`ngrok http 3000` or `cloudflared tunnel --url http://localhost:3000`),
+add that tunnel URL + `/api/sponsor/webhook` as a second webhook entry,
+and use its secret locally. Delete the tunnel entry when done.
 
 ## Scripts
 
