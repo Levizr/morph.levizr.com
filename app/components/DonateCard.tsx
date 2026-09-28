@@ -12,6 +12,7 @@ import {
 import {
   QUICK_AMOUNTS_USD,
   DEFAULT_AMOUNT_USD,
+  USD_TO_INR_RATE,
   MIN_AMOUNT_USD,
   MAX_AMOUNT_USD,
   formatUSD,
@@ -114,6 +115,9 @@ export function DonateCard() {
   const [paidAmount, setPaidAmount] = useState<number | null>(null);
   const [supporters, setSupporters] = useState<Supporter[]>([]);
   const [totals, setTotals] = useState({ total: 0, totalUSD: 0 });
+  // Live USD→INR rate for the ₹ figure. Seeds from the hardcoded fallback
+  // (same value SSR renders) so there's no hydration mismatch.
+  const [fx, setFx] = useState({ rate: USD_TO_INR_RATE, live: false });
   const mounted = useRef(true);
 
   useEffect(() => {
@@ -132,6 +136,16 @@ export function DonateCard() {
           total: Number(data.total) || 0,
           totalUSD: Number(data.totalUSD) || 0,
         });
+      })
+      .catch(() => {});
+    fetch("/api/sponsor/rate")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
+        if (!mounted.current || !data) return;
+        const rate = Number(data.rate);
+        if (Number.isFinite(rate) && rate > 0) {
+          setFx({ rate, live: data.live === true });
+        }
       })
       .catch(() => {});
     return () => {
@@ -340,8 +354,11 @@ export function DonateCard() {
           <p className="mt-1 text-sm text-muted">
             {currency === "INR" && isValidAmountUSD(amount) ? (
               <>
-                ≈ {formatINR(usdToInr(amount))} charged in INR — UPI, cards,
-                netbanking
+                ≈ {formatINR(usdToInr(amount, fx.rate))} charged in INR — UPI,
+                cards, netbanking{" "}
+                <span title="Converted at today's rate; the exact paise are fixed when you hit Donate.">
+                  ({fx.live ? "live rate" : "approx. rate"})
+                </span>
               </>
             ) : (
               <>Charged in USD on international cards · settled in INR</>

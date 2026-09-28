@@ -6,6 +6,7 @@ import {
   getRazorpay,
   getRazorpayPublicKey,
 } from "@/lib/razorpay";
+import { getUsdToInrRate } from "@/lib/fx";
 import {
   isValidAmountUSD,
   toSubunits,
@@ -51,7 +52,10 @@ export async function POST(req: Request) {
     contact: cleanString(body.contact, 30),
   };
 
-  const chargeSubunits = toSubunits(amountUSD, currency);
+  // Live rate for INR charges (cached 12h, hardcoded fallback).
+  // The applied rate is stored on the donation for a full audit trail.
+  const { rate: fxRate } = await getUsdToInrRate();
+  const chargeSubunits = toSubunits(amountUSD, currency, fxRate);
   const razorpay = getRazorpay();
   if (!razorpay) {
     return NextResponse.json({ error: NOT_CONFIGURED }, { status: 503 });
@@ -84,8 +88,9 @@ export async function POST(req: Request) {
     await Donation.create({
       ...donor,
       amountUSD,
-      chargeAmountSubunits: chargeSubunits,
+      paise: chargeSubunits,
       chargeCurrency: currency,
+      fxRate: currency === "INR" ? fxRate : undefined,
       receipt,
       razorpayOrderId: order.id,
       status: "created",

@@ -8,11 +8,23 @@ export interface IDonation extends mongoose.Document {
   email: string;
   address: string;
   contact: string;
-  /** Sticker price in USD — the source of truth for display. */
+  /** Sticker price in USD — exactly what the donor entered. */
   amountUSD: number;
-  /** What Razorpay actually charged, in the smallest subunit. */
-  chargeAmountSubunits: number;
+  /**
+   * Exact amount Razorpay charged, in the smallest currency subunit —
+   * paise for INR charges (e.g. 239800 = ₹2,398), US cents for USD charges.
+   * Same convention as Razorpay's own `amount` field; `chargeCurrency`
+   * tells you which subunit it is.
+   */
+  paise: number;
   chargeCurrency: ChargeCurrency;
+  /**
+   * USD→INR rate applied for INR charges (live rate, or the hardcoded
+   * fallback). With amountUSD + fxRate + paise you can always reconstruct
+   * exactly what the donor entered and what paise we charged.
+   * Undefined for USD charges (rate 1 by definition).
+   */
+  fxRate?: number;
   receipt: string;
   razorpayOrderId: string;
   razorpayPaymentId?: string;
@@ -30,8 +42,9 @@ const DonationSchema = new Schema<IDonation>(
     address: { type: String, default: "", maxlength: 300 },
     contact: { type: String, default: "", maxlength: 30 },
     amountUSD: { type: Number, required: true, min: 1, max: 10000 },
-    chargeAmountSubunits: { type: Number, required: true, min: 1 },
+    paise: { type: Number, required: true, min: 1 },
     chargeCurrency: { type: String, enum: ["USD", "INR"], required: true },
+    fxRate: { type: Number, min: 1 },
     receipt: { type: String, required: true },
     razorpayOrderId: { type: String, required: true, unique: true, index: true },
     razorpayPaymentId: { type: String, default: "" },

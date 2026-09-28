@@ -7,10 +7,11 @@ export const DEFAULT_AMOUNT_USD = 25;
 export const MIN_AMOUNT_USD = 1;
 export const MAX_AMOUNT_USD = 10_000;
 
-// Approximate USD→INR rate used to derive the INR charge amount from the
-// USD sticker price. Razorpay settles foreign currency to INR at the live
-// rate on its side; this constant only decides what we charge in INR.
-export const USD_TO_INR_RATE = 88;
+// Hardcoded USD→INR fallback used when the live rate is unreachable.
+// The server prefers the live rate (lib/fx.ts); this constant also seeds
+// the client display until /api/sponsor/rate responds. Bump it if it ever
+// drifts far from reality — today (Sep 2026) the market is ~95-96.
+export const USD_TO_INR_RATE = 94;
 
 export type ChargeCurrency = "USD" | "INR";
 
@@ -30,13 +31,17 @@ export const EMPTY_DONOR: DonorDetails = {
   contact: "",
 };
 
-export function usdToInr(usd: number): number {
-  return Math.round(usd * USD_TO_INR_RATE);
+export function usdToInr(usd: number, rate: number = USD_TO_INR_RATE): number {
+  return Math.round(usd * rate);
 }
 
 /** Smallest currency subunit Razorpay expects: cents for USD, paise for INR. */
-export function toSubunits(usd: number, currency: ChargeCurrency): number {
-  if (currency === "INR") return usdToInr(usd) * 100;
+export function toSubunits(
+  usd: number,
+  currency: ChargeCurrency,
+  rate: number = USD_TO_INR_RATE
+): number {
+  if (currency === "INR") return usdToInr(usd, rate) * 100;
   return Math.round(usd * 100);
 }
 
