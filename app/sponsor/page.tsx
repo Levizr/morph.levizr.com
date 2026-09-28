@@ -14,11 +14,10 @@ import {
   Server,
   Heart,
   Terminal,
-  Sparkles,
 } from "lucide-react";
 import { Navbar } from "@/app/components/Navbar";
 import { Footer } from "@/app/components/Footer";
-import { DonateButton } from "@/app/components/DonateButton";
+import { DonateCard } from "@/app/components/DonateCard";
 import { stagger, fadeUp } from "@/lib/animations";
 
 const DONATE_URL = "https://razorpay.me/@levizr";
@@ -139,21 +138,11 @@ export default function SponsorPage() {
             </motion.p>
 
             <motion.div
-              className="flex flex-col items-center justify-center gap-4 sm:flex-row"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.4 }}
             >
-              <DonateButton className="w-full sm:w-auto" />
-              <motion.a
-                href="#where-it-goes"
-                className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-border bg-surface px-8 py-4 text-base font-semibold transition-colors hover:bg-surface-hover sm:w-auto"
-                whileHover={{ scale: 1.04 }}
-                whileTap={{ scale: 0.97 }}
-              >
-                <Sparkles className="h-4 w-4" />
-                Where it goes
-              </motion.a>
+              <DonateCard />
             </motion.div>
 
             <motion.p
@@ -171,7 +160,10 @@ export default function SponsorPage() {
               >
                 razorpay.me/@levizr
               </a>{" "}
-              — UPI, cards, or netbanking. Every amount helps.
+              — or{" "}
+              <a href="#where-it-goes" className="text-accent hover:underline">
+                see where your support goes ↓
+              </a>
             </motion.p>
           </div>
         </section>

@@ -10,7 +10,6 @@ import {
   Boxes,
   Sparkles,
 } from "lucide-react";
-import { DonateButton } from "./DonateButton";
 import { stagger, fadeUp } from "@/lib/animations";
 
 const MotionLink = motion.create(Link);
@@ -95,9 +94,20 @@ export function SponsorSection() {
           viewport={{ once: true }}
           transition={{ duration: 0.6, delay: 0.15 }}
         >
-          <DonateButton className="w-full sm:w-auto" />
           <MotionLink
             href="/sponsor"
+            className="group inline-flex w-full items-center justify-center gap-2 rounded-xl bg-accent px-8 py-4 text-base font-semibold text-accent-fg shadow-lg shadow-accent/25 sm:w-auto"
+            whileHover={{
+              scale: 1.04,
+              boxShadow: "0 20px 40px -12px rgba(109, 40, 217, 0.4)",
+            }}
+            whileTap={{ scale: 0.97 }}
+          >
+            <Heart className="h-4 w-4" />
+            Donate — pick an amount
+          </MotionLink>
+          <MotionLink
+            href="/sponsor#where-it-goes"
             className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-border bg-surface px-8 py-4 text-base font-semibold transition-colors hover:bg-surface-hover sm:w-auto"
             whileHover={{ scale: 1.04 }}
             whileTap={{ scale: 0.97 }}

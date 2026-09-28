@@ -22,11 +22,35 @@ Open [http://localhost:3000](http://localhost:3000).
 
 ## Environment Variables
 
-Create `.env.local`:
+Create `.env.local` (see `.env.example`):
 
 | Variable          | Required | Description                                                              |
 | ----------------- | -------- | ------------------------------------------------------------------------ |
 | `GITHUB_TOKEN`    | no       | GitHub token for higher API rate limits (public repo works without it)   |
+
+### Sponsor donations (`/sponsor`)
+
+The custom donate card (quick USD amounts, donor details, Razorpay
+Checkout, MongoDB receipts) needs all four of these — without them the
+page still renders and falls back to the `razorpay.me/@levizr` link:
+
+| Variable                        | Required | Description                                                        |
+| ------------------------------- | -------- | ------------------------------------------------------------------ |
+| `MONGODB_URI`                   | yes      | MongoDB connection string (donation records + supporters list)     |
+| `RAZORPAY_KEY_ID`               | yes      | Razorpay Key ID — **live** keys for real money                     |
+| `RAZORPAY_KEY_SECRET`           | yes      | Razorpay Key Secret (server-side only, never the `NEXT_PUBLIC_` one) |
+| `NEXT_PUBLIC_RAZORPAY_KEY_ID`   | yes      | Same Key ID, exposed to the browser for Checkout                   |
+
+Flow: `POST /api/sponsor/order` creates a Razorpay order (USD cents, or
+INR paise when the visitor picks ₹) and stores a `created` donation →
+Checkout collects the payment → `POST /api/sponsor/verify` checks the
+HMAC-SHA256 signature and marks it `paid` → `GET /api/sponsor/donors`
+powers the supporters strip.
+
+Dashboard checklist: enable **international payments** and the **USD**
+currency on the Razorpay account so foreign cards can pay USD orders
+(they settle to INR automatically); INR orders work with UPI, cards, and
+netbanking out of the box.
 
 ## Scripts
 
