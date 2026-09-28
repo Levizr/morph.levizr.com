@@ -62,17 +62,24 @@ safety net: Razorpay retries it until every captured payment is recorded.
 
 1. Open the [Razorpay Dashboard](https://dashboard.razorpay.com) (use the
    **Test Mode** toggle first to practice, repeat in **Live Mode** for real money)
-2. Go to **Settings** (gear icon, left sidebar) → **Webhooks** → **Add New Webhook**
+2. Go to **Accounts & Settings** → **Webhooks** (under Website and app
+   settings) → **+ Add New Webhook**
 3. Webhook URL: `https://morph.levizr.com/api/sponsor/webhook`
-4. Under **Events**, tick exactly these two (leave everything else unticked):
+4. Under **Events** (Active Events), tick exactly these two (leave the rest unticked):
    - `payment.captured` — marks the donation `paid`
    - `payment.failed` — marks the donation `failed`
-5. Set **Alert Email** to an address you read (you get mailed on repeated failures)
-6. Click **Create** → click the **eye icon** next to the new webhook to reveal
-   the **Webhook Secret** → copy it
-7. Save it as `RAZORPAY_WEBHOOK_SECRET` in `.env.local` (local) **and** in
-   Vercel → Project → Settings → Environment Variables (production), then
-   redeploy/restart so the new value loads
+5. **Secret — you make this up, Razorpay doesn't generate it.** Type any
+   random string into the **Secret** field, e.g. run `openssl rand -hex 32`
+   in a terminal and paste the output. It only has to match what you put in
+   `RAZORPAY_WEBHOOK_SECRET` — it must NOT be your API key secret, and never
+   share it publicly.
+6. Set **Alert Email** to an address you read (you get mailed on repeated failures)
+7. Click **Create Webhook**. In Test Mode, enter OTP `754081` if prompted.
+   To see/change the secret later, select the webhook → **Edit**.
+8. Save the same secret as `RAZORPAY_WEBHOOK_SECRET` in `.env.local` (local)
+   **and** in Vercel → Project → Settings → Environment Variables
+   (production), then redeploy/restart so the new value loads. If the two
+   don't match, every delivery fails signature check (400).
 
 **What our handler does with each event:**
 
