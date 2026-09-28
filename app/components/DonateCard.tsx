@@ -22,6 +22,7 @@ import {
   looksLikeIndianVisitor,
   loadDonorDetails,
   saveDonorDetails,
+  EMPTY_DONOR,
   type ChargeCurrency,
   type DonorDetails,
 } from "@/lib/sponsor";
@@ -103,11 +104,11 @@ const inputClass =
 export function DonateCard() {
   const [amount, setAmount] = useState<number>(DEFAULT_AMOUNT_USD);
   const [custom, setCustom] = useState("");
-  // Lazy initializers (localStorage / locale reads) — no setState-in-effect.
-  const [currency, setCurrency] = useState<ChargeCurrency>(() =>
-    looksLikeIndianVisitor() ? "INR" : "USD"
-  );
-  const [donor, setDonor] = useState<DonorDetails>(() => loadDonorDetails());
+  // NOTE: currency + donor MUST init identically on server and client
+  // (USD + empty). The browser-only values (timezone/locale, localStorage)
+  // load in the mount effect below — otherwise SSR hydration mismatches.
+  const [currency, setCurrency] = useState<ChargeCurrency>("USD");
+  const [donor, setDonor] = useState<DonorDetails>({ ...EMPTY_DONOR });
   const [phase, setPhase] = useState<Phase>("form");
   const [error, setError] = useState<string | null>(null);
   const [paidAmount, setPaidAmount] = useState<number | null>(null);
@@ -117,6 +118,11 @@ export function DonateCard() {
 
   useEffect(() => {
     mounted.current = true;
+    // Browser-only state after hydration (see NOTE above). The disable below
+    // is intentional: one-shot sync from localStorage, not a render cascade.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setDonor(loadDonorDetails());
+    if (looksLikeIndianVisitor()) setCurrency("INR");
     fetch("/api/sponsor/donors")
       .then((r) => (r.ok ? r.json() : null))
       .then((data) => {
