@@ -10,7 +10,12 @@ import {
   Wrench,
   type LucideIcon,
 } from "lucide-react";
-import { fetchDevDocsNav, type DocEntry } from "@/lib/github-docs";
+import {
+  fetchDevDocsNav,
+  navTitle,
+  navTooltip,
+  type DocEntry,
+} from "@/lib/github-docs";
 
 export const dynamic = "force-static";
 export const revalidate = false;
@@ -56,9 +61,10 @@ function SectionCard({ section, docs }: { section: string; docs: DocEntry[] }) {
           <li key={doc.path}>
             <Link
               href={`/dev/docs/${doc.path}`}
+              title={navTooltip(doc)}
               className="group flex items-center gap-2 text-sm text-muted hover:text-accent transition-colors"
             >
-              <span className="truncate">{doc.title}</span>
+              <span className="truncate">{navTitle(doc)}</span>
             </Link>
           </li>
         ))}

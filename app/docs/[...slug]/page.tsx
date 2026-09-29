@@ -1,7 +1,13 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { fetchDocMarkdown, fetchDocsNav, type DocEntry } from "@/lib/github-docs";
+import {
+  fetchDocMarkdown,
+  fetchDocsNav,
+  navTitle,
+  navTooltip,
+  type DocEntry,
+} from "@/lib/github-docs";
 import { renderMarkdown } from "@/lib/markdown";
 import { MarkdownContent } from "../MarkdownContent";
 import { CodeCopyButtons } from "../CodeCopyButtons";
@@ -111,12 +117,15 @@ function PrevNext({ prev, next }: { prev?: DocEntry; next?: DocEntry }) {
       {prev ? (
         <Link
           href={`/docs/${prev.path}`}
+          title={navTooltip(prev)}
           className="group flex flex-col gap-1 rounded-xl border border-border bg-card p-4 hover:border-accent/40 hover:bg-surface transition-colors"
         >
           <span className="text-xs text-muted group-hover:text-accent transition-colors">
             ← Previous
           </span>
-          <span className="text-sm font-semibold truncate">{prev.title}</span>
+          <span className="text-sm font-semibold truncate">
+            {navTitle(prev)}
+          </span>
         </Link>
       ) : (
         <span />
@@ -124,13 +133,14 @@ function PrevNext({ prev, next }: { prev?: DocEntry; next?: DocEntry }) {
       {next ? (
         <Link
           href={`/docs/${next.path}`}
+          title={navTooltip(next)}
           className="group flex flex-col gap-1 items-end rounded-xl border border-border bg-card p-4 text-right hover:border-accent/40 hover:bg-surface transition-colors"
         >
           <span className="text-xs text-muted group-hover:text-accent transition-colors">
             Next →
           </span>
           <span className="text-sm font-semibold truncate max-w-full">
-            {next.title}
+            {navTitle(next)}
           </span>
         </Link>
       ) : (

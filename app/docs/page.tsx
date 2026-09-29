@@ -17,7 +17,12 @@ Map as MapIcon,
   Timer,
   type LucideIcon,
 } from "lucide-react";
-import { fetchDocsNav, type DocEntry } from "@/lib/github-docs";
+import {
+  fetchDocsNav,
+  navTitle,
+  navTooltip,
+  type DocEntry,
+} from "@/lib/github-docs";
 
 export const dynamic = "force-static";
 export const revalidate = false;
@@ -86,9 +91,10 @@ function SectionCard({ section, docs }: { section: string; docs: DocEntry[] }) {
           <li key={doc.path}>
             <Link
               href={`/docs/${doc.path}`}
+              title={navTooltip(doc)}
               className="group flex items-center gap-2 text-sm text-muted hover:text-accent transition-colors"
             >
-              <span className="truncate">{doc.title}</span>
+              <span className="truncate">{navTitle(doc)}</span>
               <StatusBadge status={doc.status ?? "production"} />
             </Link>
           </li>

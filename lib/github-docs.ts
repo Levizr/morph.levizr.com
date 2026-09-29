@@ -14,6 +14,13 @@ export const DEV_NAV_TAG = "dev-navigation-menu";
 export interface DocEntry {
   path: string;
   title: string;
+  /**
+   * Short label for navigation surfaces (sidebar, prev/next, topic lists).
+   * `title` stays the long-tail SEO/page headline; this is the human label
+   * ("Installation", not "How to Install Morph on Linux"). Falls back to
+   * `title` when the registry omits it.
+   */
+  sidebarTitle?: string;
   section: string;
   file?: string;
   status?: string;
@@ -28,6 +35,7 @@ export interface DocEntry {
 
 interface SidebarItem {
   title?: string;
+  sidebarTitle?: string;
   slug?: string;
   file?: string;
   status?: string;
@@ -62,6 +70,26 @@ function normalizeTitle(title: string, slug: string): string {
     .replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
+/**
+ * Short label for navigation surfaces. Prefers the registry's
+ * `sidebarTitle`, falling back to the full `title`.
+ */
+export function navTitle(
+  entry: Pick<DocEntry, "title" | "sidebarTitle">
+): string {
+  return entry.sidebarTitle?.trim() || entry.title;
+}
+
+/**
+ * Tooltip for a nav label: the full `title`, but only when the label shown is
+ * the short one — otherwise the tooltip would just repeat the visible text.
+ */
+export function navTooltip(
+  entry: Pick<DocEntry, "title" | "sidebarTitle">
+): string | undefined {
+  return entry.sidebarTitle?.trim() ? entry.title : undefined;
+}
+
 function parseRegistryEntries(data: unknown): DocEntry[] {
   const sections = Array.isArray(data)
     ? (data as SidebarSection[])
@@ -76,10 +104,13 @@ function parseRegistryEntries(data: unknown): DocEntry[] {
       const slug = item.slug.replace(/\.md$/, "");
       if (!slug) continue;
       const file = item.file ? item.file.replace(/\.md$/, "") : slug;
+      const title = normalizeTitle(item.title ?? "", slug);
+      const sidebarTitle = item.sidebarTitle?.trim();
       entries.push({
         path: slug,
         file,
-        title: normalizeTitle(item.title ?? "", slug),
+        title,
+        ...(sidebarTitle ? { sidebarTitle } : {}),
         section: category,
         status: item.status,
         author: item.author,

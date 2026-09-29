@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import type { DocEntry } from "@/lib/github-docs";
+import { navTitle, navTooltip, type DocEntry } from "@/lib/github-docs";
 
 interface TreeNode {
   name: string;
@@ -134,13 +134,14 @@ export function DocsSidebar({
         <Link
           key={node.doc.path}
           href={href}
-          className={`block px-2 py-1.5 rounded-lg transition-colors ${
+          title={navTooltip(node.doc)}
+          className={`block px-2 py-1.5 rounded-lg truncate transition-colors ${
             active
               ? "border-l-2 border-accent text-accent font-semibold"
               : "text-muted hover:text-foreground hover:bg-surface"
           }`}
         >
-          {node.doc.title}
+          {navTitle(node.doc)}
         </Link>
       );
     }

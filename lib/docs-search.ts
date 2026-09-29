@@ -9,6 +9,7 @@ import {
 export interface DocIndexEntry {
   path: string;
   title: string;
+  sidebarTitle?: string;
   section: string;
   headings: string[];
   text: string;
@@ -48,6 +49,7 @@ export async function fetchDocsSearchIndex(
       return {
         path: doc.path,
         title: doc.title,
+        ...(doc.sidebarTitle ? { sidebarTitle: doc.sidebarTitle } : {}),
         section: doc.section,
         headings: extractHeadings(md),
         text: markdownToText(md).slice(0, 4000),

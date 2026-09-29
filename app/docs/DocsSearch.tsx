@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Search, FileText, CornerDownLeft } from "lucide-react";
+import { navTitle, navTooltip } from "@/lib/github-docs";
 import type { DocIndexEntry } from "@/lib/docs-search";
 
 interface SearchResult {
@@ -17,6 +18,9 @@ function normalize(s: string): string {
 
 function scoreDoc(doc: DocIndexEntry, words: string[]): number {
   const title = normalize(doc.title);
+  // Only score the short label separately when there is one, so the long
+  // title is never counted twice for docs without a sidebarTitle.
+  const nav = doc.sidebarTitle ? normalize(navTitle(doc)) : "";
   const text = normalize(doc.text);
   const section = normalize(doc.section);
   const description = normalize(doc.description);
@@ -27,6 +31,8 @@ function scoreDoc(doc: DocIndexEntry, words: string[]): number {
   let score = 0;
   if (title.includes(full)) score += 50;
   if (title.startsWith(full)) score += 15;
+  if (nav && nav.includes(full)) score += 40;
+  if (nav && nav.startsWith(full)) score += 12;
   if (keywords.some((k) => k.includes(full) || full.includes(k))) score += 30;
   if (description.includes(full)) score += 15;
   if (section.includes(full)) score += 10;
@@ -37,6 +43,7 @@ function scoreDoc(doc: DocIndexEntry, words: string[]): number {
     if (w.length < 2) continue;
     if (title.includes(w)) score += 12;
     if (title.startsWith(w)) score += 6;
+    if (nav && nav.includes(w)) score += 10;
     if (keywords.some((k) => k.includes(w))) score += 10;
     if (headings.some((h) => h.includes(w))) score += 5;
     if (description.includes(w)) score += 4;
@@ -261,10 +268,13 @@ export function DocsSearch({
                             : "text-muted"
                         }`}
                       >
-                        <span className="flex items-center gap-2 text-sm font-medium">
+                        <span
+                          className="flex items-center gap-2 text-sm font-medium"
+                          title={navTooltip(r.doc)}
+                        >
                           <FileText className="w-3.5 h-3.5 shrink-0 text-accent" />
                           <span className="truncate">
-                            {highlight(r.doc.title, query)}
+                            {highlight(navTitle(r.doc), query)}
                           </span>
                           <span className="ml-auto shrink-0 text-[10px] uppercase tracking-wider text-muted/70 border border-border rounded px-1.5 py-0.5">
                             {r.doc.section}
